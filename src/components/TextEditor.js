@@ -261,14 +261,15 @@ function TextEditor(){
                     // editor.on('key', playSound(e))
                 }}
             /> */}
-            <input 
+            <textarea 
                 className='text-editor' 
                 type='text' 
                 placeholder='Type Something!'
                 value = {text}
                 onChange={(e) => setText(e.target.value)}
                 onKeyPress={(e) => playSound(e)}
-            />
+            >
+            </textarea>
         </div>
     )
 }
