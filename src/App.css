@@ -1,0 +1,15 @@
+.container {
+    text-align: center;
+    height: 500px;
+    width: 500px;
+    margin: 200px auto 200px;
+}
+
+.text-editor {
+    height: 100%;
+    width: 100%;
+}
+
+*:focus {
+    outline: none;
+}
