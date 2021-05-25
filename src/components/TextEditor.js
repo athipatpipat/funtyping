@@ -31,9 +31,11 @@ import zigzagSound from '../assets/zig-zag.mp3'
 
 function TextEditor(){
     const [text, setText] = useState('');
-    
+    const letterArray = [ 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L',
+    'M', 'N', 'O', 'P', 'Q', 'R',  'S', 'T', 'U', 'V', 'W', 'X',
+    'Y', 'Z' ];
     const playSound = (e) => {
-        const key = e.key;
+        const key = e.key.toLowerCase();
         switch (key) {
             case 'a': 
                 playA();
@@ -114,7 +116,11 @@ function TextEditor(){
                 playZ();
                 break;
             default:
-                console.log('lol lol')
+                const randomIndex = Math.floor(Math.random() * 26);
+                const randomLetter = letterArray[randomIndex];
+                console.log(key);
+                console.log(`play${randomLetter}()`);
+                eval(`play${randomLetter}()`);
                 break;
         }
     }
