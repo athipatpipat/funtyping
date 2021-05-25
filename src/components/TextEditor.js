@@ -2,23 +2,46 @@ import { useState } from 'react';
 import { CKEditor } from '@ckeditor/ckeditor5-react';
 import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
 import useSound from 'use-sound';
-import keyboardSound from '../assets/comfort.mp3'
+import keyboardSound from '../assets/keyboard.mp3'
+import comfortSong from '../assets/comfort.mp3'
+import bubbleSound from '../assets/bubbles.mp3'
 
 function TextEditor(){
     const [text, setText] = useState('');
     
     const playSound = (e) => {
         // const key = e.target.value;
-        console.log(e);
-        if (e.key === 'a') {
-            playKeyboardSound();
-        } else {
-            alert('What are you doing!');
+        const key = e.key;
+        // console.log(e);
+        switch (key) {
+            case 'a': 
+                playKeyboardSound();
+                break;
+            case 'b': 
+                playComfortSong();
+                break;
+            case 'c':
+                playBubbleSound();
+
+            default:
+                console.log('lol lol')
+                break;
         }
     }
     const [playKeyboardSound] = useSound(
-        keyboardSound
-    );
+        keyboardSound, {
+         interrupt: true,
+        });
+    
+    const [playComfortSong] = useSound(
+        comfortSong, {
+            interrupt: true,
+        });
+
+    const [playBubbleSound] = useSound(
+        bubbleSound, {
+            interrupt: true,
+        });
 
     return (
         <div >
