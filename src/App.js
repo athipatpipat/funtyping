@@ -1,10 +1,10 @@
 import './App.css';
-import TextEditor from './components/TextEditor'
+import InteractionSpace from './components/InteractionSpace'
 
 function App() {
   return (
     <div className="App">
-      <TextEditor />
+      <InteractionSpace />
     </div>
   );
 }
