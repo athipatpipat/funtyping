@@ -87,6 +87,7 @@ app.get('/files', (req, res) => {
 
 app.get('/file/:filename', (req, res) => {
     console.log(req.params.id);
+    res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000');
     gfs.files.findOne({ filename: req.params.filename }, (err, file) => {
       // Check if file
       if (!file || file.length === 0) {

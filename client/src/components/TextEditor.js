@@ -1,6 +1,4 @@
 import { useState } from 'react';
-import { CKEditor } from '@ckeditor/ckeditor5-react';
-import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
 import useSound from 'use-sound';
 import bubbleSound from '../assets/bubbles.mp3'
 import claySound from '../assets/clay.mp3'
@@ -31,6 +29,7 @@ import zigzagSound from '../assets/zig-zag.mp3'
 
 function TextEditor(){
     const [text, setText] = useState('');
+    const [soundA, setSoundA] = useState(bubbleSound)
     const letterArray = [ 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L',
     'M', 'N', 'O', 'P', 'Q', 'R',  'S', 'T', 'U', 'V', 'W', 'X',
     'Y', 'Z' ];
@@ -124,9 +123,9 @@ function TextEditor(){
                 break;
         }
     }
-
-    const [playA] = useSound(
-        bubbleSound, {
+    
+    let [playA] = useSound(
+        soundA, {
             interrupt: true,
         });
 
@@ -254,19 +253,14 @@ function TextEditor(){
             interrupt: true,
         });
         
+    const changeA = () => {
+        fetch(`http://localhost:5000/file/7dede6dbcdbcda21206c66440a48f514.mp3`)
+            .then(response => setSoundA(response.url))
+            .catch(e => console.log(e))
+    }
 
     return (
         <div className='container'>
-            {/* <CKEditor
-                editor={ClassicEditor}
-                data={text}
-                onChange={(e, editor) => {
-                    const data = editor.getData();
-                    // console.log(editor);
-                    setText(data);
-                    // editor.on('key', playSound(e))
-                }}
-            /> */}
             <textarea 
                 className='text-editor' 
                 type='text' 
@@ -276,6 +270,7 @@ function TextEditor(){
                 onKeyPress={(e) => playSound(e)}
             >
             </textarea>
+            <button onClick={changeA}>Change Sound A</button>
         </div>
     )
 }
