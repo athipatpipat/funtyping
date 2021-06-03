@@ -43,11 +43,13 @@ const storage = new GridFsStorage({
     url: mongoURI,
     file: (req, file) => {
       return new Promise((resolve, reject) => {
+        console.log(req.body);
         crypto.randomBytes(16, (err, buf) => {
           if (err) {
             return reject(err);
           }
-          const filename = buf.toString('hex') + path.extname(file.originalname);
+          // const filename = buf.toString('hex') + path.extname(file.originalname);
+          const filename = req.body.key + path.extname(file.originalname);
           const fileInfo = {
             filename: filename,
             bucketName: 'uploads'
@@ -63,12 +65,14 @@ app.get('/', (req, res) => {
     res.render('index');
 });
 
-app.post('/upload', upload.single('file'), async (req, res) => {
+app.post('/upload', upload.single('file'), (req, res) => {
+    res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000');
     // res.json({file: req.file});
     // res.status(201).send();
     // Redirect to the home page
     console.log("sound upload");
-    res.redirect('/');
+    res.status(201).send({"key":req.body.key});
+    // res.redirect(`/file/${req.body.key}.mp3`);
 })
 
 app.get('/files', (req, res) => {
@@ -86,7 +90,6 @@ app.get('/files', (req, res) => {
 });
 
 app.get('/file/:filename', (req, res) => {
-    console.log(req.params.id);
     res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000');
     gfs.files.findOne({ filename: req.params.filename }, (err, file) => {
       // Check if file
