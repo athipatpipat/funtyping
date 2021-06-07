@@ -1,7 +1,7 @@
 // ========================================
 //           Import Dependencies
 // ========================================
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import useSound from 'use-sound';
 import Modal from 'react-bootstrap/Modal';
@@ -58,7 +58,7 @@ function TextEditor() {
     const [form, setForm] = useState({}) // Form State
     const [errors, setErrors] = useState({}) // Form Validation State
     const [show, setShow] = useState(false); // Model (Pop-up Form) State
-    const [currHash, setCurrHash] = useState("abc.mp3"); 
+    const [currHash, setCurrHash] = useState(''); 
 
 
     const letterArray = [ 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L',
@@ -292,13 +292,10 @@ function TextEditor() {
     //                   Change Sound
     // ================================================
     const setSoundKey = (key, newSound) => {
-        let tmp = [sound['A'], sound['B'], sound['C']]
-        tmp[key] = newSound
-        setSound(tmp)
-        // setSound({
-        //     ...sound,
-        //     [key]: newSound
-        //   })
+        setSound({
+            ...sound,
+            [key]: newSound
+          })
     }
 
     const setSoundCountKey = (key, newCount) => {
@@ -307,49 +304,58 @@ function TextEditor() {
             [key]: newCount
         })
     }
-
+ 
     const getHashName = () => {
-        const getHashKey = form['key'];
-        fetch(`http://localhost:5000/${getHashKey}`)
-            .then(response => response.json())
-            .then(json => {
-                console.log('setting hash state')
-                setCurrHash(json.hash)
+        const key = form['key'];
+        fetch(`http://localhost:5000/${key}`)
+            // .then(response => response.json())
+            .then(async response => {
+                const resposneMessage = await response.json();
+                return resposneMessage
             })
-            .then(deleteOldSound())
+            .then(response => {
+                console.log('setting hash state.')
+                console.log(`curr hash: ${response.hashname}`)
+                setCurrHash(response.hashname)
+            })
     }
 
+    useEffect(() => {
+        deleteOldSound()
+    }, [currHash])
+
     const deleteOldSound = () => {
-        // const deleteKey = form['key'];
+        console.log(`deleting ${currHash}`); 
         fetch(`http://localhost:5000/${currHash}`, {
             method: 'DELETE'
         })
         .then(async response => {
-            console.log(response);
             const resposneMessage = await response.json();
-            console.log('', resposneMessage);
+            console.log(`finish deleting ${currHash}`)
         })
         .then(() => {
-            console.log('start uploading...')
+            console.log('start uploading new sound...')
             uploadSound()
         })
     }
 
     const uploadSound = () => {
-        let soundForm = document.getElementById('soundForm');
-        let formData = new FormData(soundForm);
+        var soundForm = document.getElementById('soundForm');
+        var formData = new FormData(soundForm);
         fetch('http://localhost:5000/upload', {
                 method: 'POST',
                 body: formData
             })
             .then(async response => {
-                console.log('finish uploading:', response);
+                console.log('finish uploading new sound!');
                 const resposneMessage = await response.json();
                 return resposneMessage;
             })
             .then((response) => {
-                // console.log('updating the state...', response.key);
-                changeKeySound(response.key);
+                console.log('start mapping the new sound to a key')
+                console.log(`key: ${response.key}`)
+                console.log(`sound: ${response.hashname}`)
+                changeKeySound(response.key, response.hashname);
             })
             .then(() => {
                 setForm({})
@@ -359,19 +365,14 @@ function TextEditor() {
             .catch(e => console.log(e))
     }
 
-    const changeKeySound = (key, hash) => {
-        fetch(`http://localhost:5000/file/${hash}`)
+    const changeKeySound = (key, hashname) => {
+        fetch(`http://localhost:5000/file/${hashname}`)
             .then(async response => {
                 const newSound = await response.url;
-                console.log("change state")
-                console.log(newSound)
-                // let oldCount = soundCount[key]
-                // setSoundCountKey(key, oldCount+1)
-                // console.log(soundCount)
-                // console.log(key)
-                // setSoundKey(key, soundCount[key] + newSound);
+                console.log("done mapping to key to new sound")
+                console.log(`${key} : ${hashname}`)
+                console.log('new sound:', newSound)
                 setSoundKey(key, newSound);
-                
             })
             .then(() => {
                 console.log("finish uploading the sound")
