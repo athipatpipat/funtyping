@@ -1,7 +1,7 @@
 // ========================================
 //           Import Dependencies
 // ========================================
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import useSound from 'use-sound';
 import Modal from 'react-bootstrap/Modal';
@@ -44,9 +44,21 @@ function TextEditor() {
     // =====================================
     const [text, setText] = useState(''); // Text Area State
     const [soundA, setSoundA] = useState(bubbleSound) // Sounds State
+    const [sound, setSound] = useState({             // Sounds State V2
+        'A': bubbleSound,
+        'B': claySound,
+        'C': confettiSound
+    })
+    const [soundCount, setSoundCount] = useState({
+        'A': 0,
+        'B': 0,
+        'C': 0
+    })
+
     const [form, setForm] = useState({}) // Form State
     const [errors, setErrors] = useState({}) // Form Validation State
     const [show, setShow] = useState(false); // Model (Pop-up Form) State
+    const [currHash, setCurrHash] = useState(''); 
 
 
     const letterArray = [ 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L',
@@ -145,17 +157,20 @@ function TextEditor() {
     }
     
     let [playA] = useSound(
-        soundA, {
+        sound['A'], {
+        //soundA, {
             interrupt: true,
         });
 
     const [playB] = useSound(
-        claySound, {
+        sound['B'], {
+        //claySound, {
             interrupt: true,
         });
 
     const [playC] = useSound(
-        confettiSound, {
+        sound['C'], {
+        // confettiSound, {
             interrupt: true,
         });
     
@@ -276,22 +291,71 @@ function TextEditor() {
     // ================================================
     //                   Change Sound
     // ================================================
+    const setSoundKey = (key, newSound) => {
+        setSound({
+            ...sound,
+            [key]: newSound
+          })
+    }
+
+    const setSoundCountKey = (key, newCount) => {
+        setSoundCount({
+            ...soundCount,
+            [key]: newCount
+        })
+    }
+ 
+    const getHashName = () => {
+        const key = form['key'];
+        fetch(`http://localhost:5000/${key}`)
+            // .then(response => response.json())
+            .then(async response => {
+                const resposneMessage = await response.json();
+                return resposneMessage
+            })
+            .then(response => {
+                console.log('setting hash state.')
+                console.log(`curr hash: ${response.hashname}`)
+                setCurrHash(response.hashname)
+            })
+    }
+
+    useEffect(() => {
+        deleteOldSound()
+    }, [currHash])
+
+    const deleteOldSound = () => {
+        console.log(`deleting ${currHash}`); 
+        fetch(`http://localhost:5000/${currHash}`, {
+            method: 'DELETE'
+        })
+        .then(async response => {
+            const resposneMessage = await response.json();
+            console.log(`finish deleting ${currHash}`)
+        })
+        .then(() => {
+            console.log('start uploading new sound...')
+            uploadSound()
+        })
+    }
+
     const uploadSound = () => {
-        let soundForm = document.getElementById('soundForm');
-        let formData = new FormData(soundForm);
-        console.log(formData);
+        var soundForm = document.getElementById('soundForm');
+        var formData = new FormData(soundForm);
         fetch('http://localhost:5000/upload', {
                 method: 'POST',
                 body: formData
             })
             .then(async response => {
-                console.log(response);
+                console.log('finish uploading new sound!');
                 const resposneMessage = await response.json();
                 return resposneMessage;
             })
             .then((response) => {
-                console.log(response.key);
-                changeA(response.key);
+                console.log('start mapping the new sound to a key')
+                console.log(`key: ${response.key}`)
+                console.log(`sound: ${response.hashname}`)
+                changeKeySound(response.key, response.hashname);
             })
             .then(() => {
                 setForm({})
@@ -301,13 +365,95 @@ function TextEditor() {
             .catch(e => console.log(e))
     }
 
-    const changeA = (key) => {
-        console.log(key)
-        fetch(`http://localhost:5000/file/${key}.mp3`)
-            .then(response => setSoundA(response.url))
-            .then(alert('New Sound Upload!'))
+    const changeKeySound = (key, hashname) => {
+        fetch(`http://localhost:5000/file/${hashname}`)
+            .then(async response => {
+                const newSound = await response.url;
+                console.log("done mapping to key to new sound")
+                console.log(`${key} : ${hashname}`)
+                console.log('new sound:', newSound)
+                setSoundKey(key, newSound);
+            })
+            .then(() => {
+                console.log("finish uploading the sound")
+                alert('New Sound Upload!')
+            })
+            // .then(deleteOldSound(key))
             .catch(e => console.log(e))
     }
+
+
+    // const uploadSound = () => {
+    //     let soundForm = document.getElementById('soundForm');
+    //     let formData = new FormData(soundForm);
+    //     fetch('http://localhost:5000/upload', {
+    //             method: 'POST',
+    //             body: formData
+    //         })
+    //         .then(async response => {
+    //             console.log('finish uploading:', response);
+    //             const resposneMessage = await response.json();
+    //             return resposneMessage;
+    //         })
+    //         .then((response) => {
+    //             console.log('updating the state...', response.key);
+    //             changeKeySound(response.key);
+    //         })
+    //         .then(() => {
+    //             setForm({})
+    //             setErrors({})
+    //             setShow(false);
+    //         })
+    //         .catch(e => console.log(e))
+    // }
+
+    // const changeKeySound = (key) => {
+    //     const oldCount = soundCount[key[0]] 
+    //     const deleteCount = oldCount > 0 ? oldCount - 1 : 'Nothing';
+    //     const newCount = oldCount + 1;
+    //     const updateKey = key[0]
+    //     const deleteKey = updateKey + deleteCount;
+    //     setSoundCountKey(updateKey, newCount);
+
+    //     fetch(`http://localhost:5000/file/${key}.mp3`)
+    //         .then(async response => {
+    //             const newSound = await response.url;
+    //             setSoundKey(updateKey, newSound);
+    //         })
+    //         .then(alert('New Sound Upload!'))
+    //         .then(deleteOldSound(deleteKey))
+    //         .catch(e => console.log(e))
+    // }
+
+    // const deleteOldSound = (deleteKey) => {
+    //     fetch(`http://localhost:5000/file/${deleteKey}.mp3`, {
+    //         method: 'DELETE'
+    //     })
+    //     .then(async response => {
+    //         console.log(response);
+    //         const resposneMessage = await response.json();
+    //         console.log('', resposneMessage);
+    //     })
+    // }
+
+
+    // const changeA = (key) => {
+    //     const oldCount = soundCount[key[0]] 
+    //     const deleteCount = oldCount > 0 ? oldCount - 1 : 'Nothing';
+    //     const newCount = oldCount + 1;
+    //     const updateKey = key[0]
+    //     const deleteKey = updateKey + deleteCount;
+    //     setSoundCountKey(updateKey, newCount);
+
+    //     fetch(`http://localhost:5000/file/${key}.mp3`)
+    //         .then(async response => {
+    //             const newSound = await response.url;
+    //             setSoundA(newSound);
+    //         })
+    //         .then(alert('New Sound Upload!'))
+    //         .then(deleteOldSound(deleteKey))
+    //         .catch(e => console.log(e))
+    // }
 
     // ================================================
     //        Form Model Helper Functions
@@ -346,7 +492,8 @@ function TextEditor() {
           setErrors(newErrors)
         } else {
           // No errors
-          uploadSound();
+          getHashName();
+          // uploadSound();
         }
       }
     
@@ -358,6 +505,25 @@ function TextEditor() {
         // Sound errors
         if (!sound || sound === '') newErrors.sound = 'Please upload the sound!'
         return newErrors;
+    }
+
+    // ================================================
+    //        Create Option Tag Helper Function
+    // ================================================
+    // const makeOption = () => {
+    //     let optionTag = [];         
+    //     for (const letter of letterArray) {             
+    //         optionTag.push(<option key={letter} value={letter+soundCount[letter]}>{letter}</option>);  
+    //     }
+    //     return optionTag;
+    // }
+
+    const makeOption = () => {
+        let optionTag = [];         
+        for (const letter of letterArray) {             
+            optionTag.push(<option key={letter} value={letter}>{letter}</option>);  
+        }
+        return optionTag;
     }
 
     return (
@@ -397,11 +563,19 @@ function TextEditor() {
                                 isInvalid={ !!errors.key }
                             >
                                 <option value=''>Choose the key</option>
-                                <option value='A'>A</option>
-                                <option value='B'>B</option>
+                                {makeOption()}
+                                {/* <option value='A'>A</option>
+                                <option value='B'>B</option> */}
                             </Form.Control>
                             <Form.Control.Feedback type='invalid'>{ errors.key }</Form.Control.Feedback>
                         </Form.Group>
+                        {/* <Form.Group>
+                            <Form.Control
+                                name='count'
+                                type="text"
+                                value={soundCount[form['key']] || ''}
+                            />
+                        </Form.Group> */}
                         <Form.Group>
                             <Form.File
                                 name='file'

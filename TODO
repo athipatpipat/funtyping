@@ -1,0 +1,25 @@
+1. get /{keyname} returns hash of file corresponding to that key
+2. get /file/{hash}
+
+
+1. Delete the sound (A.mp3)
+2. Post the new sound (A.mp3)
+3. Get the new sound and update the state of the key
+
+
+
+1. Make the User Schema to keep track of the sound name (user playlist)
+
+User1         {
+                    A: bubble.mp3,
+                    B: clay.mp3,
+                    C: XXXXXX
+              }
+
+
+2. Fecth that list once the app start and put it in the state 
+3. When uploading a new sound
+   - (Store the name of the old sound)
+   - Upload the new sound and have its return the hash of the sound name
+   - Use that hash to Patch the user playlist 
+   - Update the state of the key to sound w/ the hash name
