@@ -1,4 +1,6 @@
-const gifSize = 300
+// const gifSize = 300
+const canvasHeight = window.innerHeight
+const canvasWidth = window.innerWidth
 
 	// Run this function after the page is loaded
 	window.addEventListener("load", function() {
@@ -18,9 +20,9 @@ const gifSize = 300
 			let titleEl = document.createElement("h3")
 			let canvasHolder = document.createElement("div")
 			holderEl.append(el)
-			el.append(titleEl)
+			// el.append(titleEl)
 			el.append(canvasHolder)
-			titleEl.innerHTML = animation.title
+			// titleEl.innerHTML = animation.title
 
 
 
@@ -34,7 +36,7 @@ const gifSize = 300
 					p.ellipseMode(p.ELLIPSE_RADIUS);
 
 					p.setup = () => {
-						p.createCanvas(gifSize, gifSize);
+						p.createCanvas(canvasWidth, canvasHeight);
 						if (animation.setup)
 							animation.setup(p)
 					}
@@ -46,3 +48,10 @@ const gifSize = 300
 		})
 	})
 console.log("hello")
+
+const resetAnimationLife = () => {
+	animation_life = 40
+	console.log("keypress detected")
+}
+
+document.addEventListener('keydown', resetAnimationLife)
