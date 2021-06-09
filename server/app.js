@@ -43,7 +43,7 @@ conn.once('open', () => {
 });
 
 // Create storage engine
-
+let filename = ""
 const storage = new GridFsStorage({
     url: mongoURI,
     file: (req, file) => {
@@ -58,7 +58,7 @@ const storage = new GridFsStorage({
           // console.log(newFile);
           // soundCount['A'] += 1;
           // console.log(soundCount);
-          const filename = buf.toString('hex') + path.extname(file.originalname);
+          filename = buf.toString('hex') + path.extname(file.originalname);
           // const filename = req.body.key + path.extname(file.originalname);
           const fileInfo = {
             filename: filename,
@@ -83,7 +83,8 @@ app.post('/upload', upload.single('file'), (req, res) => {
     // Redirect to the home page
     console.log(req.body.key + "-" + req.file.originalname);
     console.log("sound upload");
-    res.status(201).send({"key":req.body.key});
+    console.log(req.body)
+    res.status(201).send({"key":req.body.key, "hash": filename});
     // res.redirect(`/file/${req.body.key}.mp3`);
 })
 

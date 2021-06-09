@@ -315,8 +315,9 @@ function TextEditor() {
             })
             .then(response => {
                 console.log('setting hash state.')
-                console.log(`curr hash: ${response.hashname}`)
-                setCurrHash(response.hashname)
+                // console.log(response)
+                console.log(`curr hash: ${response.hash}`)
+                setCurrHash(response.hash)
             })
     }
 
@@ -354,8 +355,9 @@ function TextEditor() {
             .then((response) => {
                 console.log('start mapping the new sound to a key')
                 console.log(`key: ${response.key}`)
-                console.log(`sound: ${response.hashname}`)
-                changeKeySound(response.key, response.hashname);
+                console.log(response)
+                console.log(`sound: ${response.hash}`)
+                changeKeySound(response.key, response.hash);
             })
             .then(() => {
                 setForm({})
